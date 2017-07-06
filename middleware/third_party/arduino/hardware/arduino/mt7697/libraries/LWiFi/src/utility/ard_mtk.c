@@ -225,6 +225,12 @@ void lwip_init_start(uint8_t opmode)
 			break;
 		case WIFI_MODE_AP_ONLY:
 			/*......*/
+//michael
+			struct netif *ap_if;
+            		ap_if = netif_find_by_type(NETIF_TYPE_AP);
+            		netif_set_default(ap_if);
+            		netif_set_link_up(ap_if);
+//michael
 			break;
 	}
 }
@@ -267,18 +273,29 @@ int8_t set_net(const char* ssid, uint8_t ssid_len)
 	if (!wifi_ready()) {
 
 		wifi_config_t config = {0};
-
+//michael
+#if 1
+		config.opmode = WIFI_MODE_AP_ONLY;
+   		strcpy((char *)config.ap_config.ssid, ssid);
+		config.ap_config.ssid_length = ssid_len;	
+#else	
 		config.opmode = WIFI_MODE_STA_ONLY;
-
 		strcpy((char *)config.sta_config.ssid, ssid);
 		config.sta_config.ssid_length = ssid_len;
-
+#endif		
+//michael
 		wifi_init(&config, NULL);
 		lwip_tcpip_init(NULL, config.opmode);
 
 	} else {
 
+//michael
+#if 1
+                uint8_t port = WIFI_PORT_AP;		
+#else
 		uint8_t port = WIFI_PORT_STA;
+#endif
+//michael
 		wifi_auth_mode_t auth = WIFI_AUTH_MODE_OPEN;
 		wifi_encrypt_type_t encrypt = WIFI_ENCRYPT_TYPE_WEP_DISABLED;
 
@@ -298,9 +315,13 @@ int8_t set_net(const char* ssid, uint8_t ssid_len)
 		}
 
 	}
-
+//michael
+#if 1
+	lwip_init_start(WIFI_MODE_AP_ONLY);
+#else
 	lwip_init_start(WIFI_MODE_STA_ONLY);
-
+#endif
+//michael
 	return WL_SUCCESS;
 err:
 	return WL_FAILURE;
@@ -316,6 +337,16 @@ int8_t set_key(const char *ssid, uint8_t ssid_len, uint8_t key_idx, const char *
 		wifi_config_t config = {0};
 		wifi_config_ext_t config_ext = {0};
 
+//michael
+#if 1
+		config.opmode = WIFI_MODE_AP_ONLY;
+
+		strcpy((char *)config.ap_config.ssid, ssid);
+		config.ap_config.ssid_length = ssid_len;
+
+		strcpy((char *)config.ap_config.password, key);
+		config.ap_config.password_length = len;					
+#else
 		config.opmode = WIFI_MODE_STA_ONLY;
 
 		strcpy((char *)config.sta_config.ssid, ssid);
@@ -323,7 +354,8 @@ int8_t set_key(const char *ssid, uint8_t ssid_len, uint8_t key_idx, const char *
 
 		strcpy((char *)config.sta_config.password, key);
 		config.sta_config.password_length = len;
-
+#endif
+//michael
 		config_ext.sta_wep_key_index_present = 1;
 		config_ext.sta_wep_key_index = key_idx;
 
@@ -332,7 +364,13 @@ int8_t set_key(const char *ssid, uint8_t ssid_len, uint8_t key_idx, const char *
 
 	} else {
 
+//michael
+#if 1
+		uint8_t port = WIFI_PORT_AP;
+#else
 		uint8_t port = WIFI_PORT_STA;
+#endif
+//michael
 		wifi_auth_mode_t auth = WIFI_AUTH_MODE_OPEN;
 		wifi_encrypt_type_t encrypt = WIFI_ENCRYPT_TYPE_WEP_ENABLED;
 		const char *password = key;
@@ -365,8 +403,14 @@ int8_t set_key(const char *ssid, uint8_t ssid_len, uint8_t key_idx, const char *
 
 	}
 
+//michael
+#if 1
+	lwip_init_start(WIFI_MODE_AP_ONLY);	
+#else	
 	lwip_init_start(WIFI_MODE_STA_ONLY);
-
+#endif
+//michael
+	
 	return WL_SUCCESS;
 err:
 	return WL_FAILURE;
@@ -381,20 +425,38 @@ int8_t set_passphrase(const char* ssid, uint8_t ssid_len, const char *passphrase
 
 		wifi_config_t config = {0};
 
-		config.opmode = WIFI_MODE_STA_ONLY;
+//michael
+#if 1
+		config.opmode = WIFI_MODE_AP_ONLY;
+		
+		strcpy((char *)config.ap_config.ssid, ssid);
+		config.ap_config.ssid_length = ssid_len;
 
+		strcpy((char *)config.ap_config.password, passphrase);
+		config.ap_config.password_length = len;		
+#else
+		config.opmode = WIFI_MODE_STA_ONLY;
+		
 		strcpy((char *)config.sta_config.ssid, ssid);
 		config.sta_config.ssid_length = ssid_len;
 
 		strcpy((char *)config.sta_config.password, passphrase);
 		config.sta_config.password_length = len;
-
+#endif
+//michael
 		wifi_init(&config, NULL);
 		lwip_tcpip_init(NULL, config.opmode);
 
 	} else {
 
+//michael
+#if 1
+		uint8_t port = WIFI_PORT_AP;		
+#else
 		uint8_t port = WIFI_PORT_STA;
+#endif
+//michael
+		
 		wifi_auth_mode_t auth = WIFI_AUTH_MODE_WPA2_PSK;
 		wifi_encrypt_type_t encrypt = WIFI_ENCRYPT_TYPE_AES_ENABLED;
 
@@ -420,8 +482,14 @@ int8_t set_passphrase(const char* ssid, uint8_t ssid_len, const char *passphrase
 
 	}
 
+//michael
+#if 1
+	lwip_init_start(WIFI_MODE_AP_ONLY);
+#else
 	lwip_init_start(WIFI_MODE_STA_ONLY);
-
+#endif
+//michael
+	
 	return WL_SUCCESS;
 err:
 	return WL_FAILURE;
